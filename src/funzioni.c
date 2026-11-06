@@ -99,19 +99,25 @@ Status stampa_lista(const Lista *lista){
 }
 
 
-Status libera_memoria_lista(Lista *lista){
+Status libera_memoria_lista(Lista **lista_ptr){
+    
+    if(lista_ptr == NULL || *lista_ptr == NULL) return STATUS_ERR_NULL_PTR;
 
-    if(lista == NULL) return STATUS_ERR_NULL_PTR;
+    // Estraggo il vero puntatore per comodità
+    Lista *lista = *lista_ptr; 
 
     SLEEP_MS(1000);
 
+    // Libero prima l'array interno
     free(lista->data);
     lista->data = NULL;
-
     lista->capacity = 0;
     lista->size = 0;
 
     free(lista);
+
+    //azzero il puntatore originale!
+    *lista_ptr = NULL; 
 
     return STATUS_OK;
 }

@@ -14,7 +14,7 @@ typedef enum {
 Status create_list(size_t capacity, Lista **out_lista);
 Status stampa_lista(const Lista *lista);
 Status aggiungi_numero_alla_lista(Lista *lista, int numero);
-Status libera_memoria_lista(Lista *lista);
+Status libera_memoria_lista(Lista **lista_ptr);
 void check_funzione_con_switch(Status stato);
 
 #endif
