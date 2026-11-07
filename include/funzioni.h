@@ -6,15 +6,20 @@
 typedef struct Lista Lista;
 
 typedef enum {
-    STATUS_OK = 0,               // tutto perfetto
-    STATUS_ERR_ALLC_MEMORY,      // Errore di allocazione memoria
-    STATUS_ERR_NULL_PTR          // Errore se qualcuno ci passa una lista vuota (NULL)
+    STATUS_OK = 0,
+    STATUS_ERR_ALLC_MEMORY,
+    STATUS_ERR_NULL_PTR
 } Status;
 
 Status create_list(size_t capacity, Lista **out_lista);
 Status stampa_lista(const Lista *lista);
 Status aggiungi_numero_alla_lista(Lista *lista, int numero);
 Status libera_memoria_lista(Lista **lista_ptr);
-void check_funzione_con_switch(Status stato);
+
+// Funzione interna di log con file e riga
+void check_funzione_interna(Status stato, const char *file, int line);
+
+// MACRO PROFESSIONALE: cattura in automatico file e riga dove viene invocata
+#define CHECK(chiamata) check_funzione_interna((chiamata), __FILE__, __LINE__)
 
 #endif

@@ -2,15 +2,8 @@
 #include <stdlib.h>
 #include "funzioni.h"
 
-// le macro rendono il codice più mantenibile nel tempo
-
 #define DIMENSIONE_MINIMA_LISTA 4 
 #define NUMERO_ELEMENTI_AGGIUNTI 5
-
-/* il preprocessore sostituisce tutte le occorrenze di SLEEP_MS
-e in base al sistema operativo sostituisce il valore (il * 1000 è necessario perchè
- la funzione usleep lavora in microsecondi)
-*/
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -20,35 +13,24 @@ e in base al sistema operativo sostituisce il valore (il * 1000 è necessario pe
     #define SLEEP_MS(ms) usleep((ms) * 1000)
 #endif
 
-
 struct Lista {
     int *data;
     size_t size;
     size_t capacity;
 };
 
-
-Status create_list(size_t capacity, Lista **lista){
-
-    if(lista == NULL) return STATUS_ERR_NULL_PTR;
+Status create_list(size_t capacity, Lista **lista) {
+    if (lista == NULL) return STATUS_ERR_NULL_PTR;
 
     Lista *nuova_lista = malloc(sizeof(Lista));
-
-    if(nuova_lista == NULL){
-        return STATUS_ERR_ALLC_MEMORY; // perchè è una funzione di tipo Lista*
+    if (nuova_lista == NULL) {
+        return STATUS_ERR_ALLC_MEMORY;
     }
 
-    /*se la capacita digitata dall'utente dovesse risultare 0 la nostra
-    lista avrà una capacità di 4 elementi operatore ternario
-    se invece è maggiore di 0 il valore di cap iniziale rimane quello del parametro della 
-    funzione
-    */
-
     size_t cap_iniziale = (capacity > 0) ? capacity : DIMENSIONE_MINIMA_LISTA;
-
     nuova_lista->data = malloc(sizeof(int) * cap_iniziale);
 
-    if(nuova_lista->data == NULL){
+    if (nuova_lista->data == NULL) {
         free(nuova_lista);
         return STATUS_ERR_ALLC_MEMORY;
     }
@@ -57,20 +39,18 @@ Status create_list(size_t capacity, Lista **lista){
     nuova_lista->size = 0;
 
     *lista = nuova_lista;
-
     return STATUS_OK;
 }
 
-Status aggiungi_numero_alla_lista(Lista *lista, int numero){
+Status aggiungi_numero_alla_lista(Lista *lista, int numero) {
+    if (lista == NULL) return STATUS_ERR_NULL_PTR;
 
-    if(lista == NULL) return STATUS_ERR_NULL_PTR;
-
-    if(lista->capacity == lista->size){
-        SLEEP_MS(2000);
+    if (lista->capacity == lista->size) {
+        SLEEP_MS(500);
         size_t new_capacity = lista->capacity + NUMERO_ELEMENTI_AGGIUNTI;
         int *tmp = realloc(lista->data, sizeof(int) * new_capacity);
 
-        if(tmp == NULL){
+        if (tmp == NULL) {
             return STATUS_ERR_ALLC_MEMORY;
         }
 
@@ -84,62 +64,52 @@ Status aggiungi_numero_alla_lista(Lista *lista, int numero){
     return STATUS_OK;
 }
 
-Status stampa_lista(const Lista *lista){
+Status stampa_lista(const Lista *lista) {
+    if (lista == NULL) return STATUS_ERR_NULL_PTR;
 
-    if(lista == NULL) return STATUS_ERR_NULL_PTR;
-
-    printf("    ---CONTENUTO DELLA LISTA---\n\n");
-    for(size_t i = 0; i < lista->size; i++){
+    printf("    --- CONTENUTO DELLA LISTA ---\n\n");
+    for (size_t i = 0; i < lista->size; i++) {
         printf("[%d]\t", lista->data[i]);
     }
     printf("\n\n");
 
     return STATUS_OK;
-
 }
 
+Status libera_memoria_lista(Lista **lista_ptr) {
+    if (lista_ptr == NULL || *lista_ptr == NULL) return STATUS_ERR_NULL_PTR;
 
-Status libera_memoria_lista(Lista **lista_ptr){
-    
-    if(lista_ptr == NULL || *lista_ptr == NULL) return STATUS_ERR_NULL_PTR;
-
-    // Estraggo il vero puntatore per comodità
     Lista *lista = *lista_ptr; 
+    SLEEP_MS(500);
 
-    SLEEP_MS(1000);
-
-    // Libero prima l'array interno
-    free(lista->data);
-    lista->data = NULL;
+    if (lista->data != NULL) {
+        free(lista->data);
+        lista->data = NULL;
+    }
     lista->capacity = 0;
     lista->size = 0;
 
     free(lista);
-
-    //azzero il puntatore originale!
     *lista_ptr = NULL; 
 
     return STATUS_OK;
 }
 
-
-void check_funzione_con_switch(Status stato){
-
-    switch(stato){
-
+void check_funzione_interna(Status stato, const char *file, int line) {
+    switch (stato) {
         case STATUS_OK:
             break; 
 
         case STATUS_ERR_ALLC_MEMORY:
-            fprintf(stderr, "[CRITICO] Impossibile avviare il programma: RAM esaurita durante la creazione della lista.\n");
+            fprintf(stderr, "[CRITICO] [%s:%d] RAM esaurita durante l'allocazione.\n", file, line);
             exit(EXIT_FAILURE);
 
         case STATUS_ERR_NULL_PTR:
-            fprintf(stderr, "[BUG] Errore interno: hai passato un doppio puntatore NULL a create_list.\n");
+            fprintf(stderr, "[BUG] [%s:%d] Puntatore NULL non valido passato alla funzione.\n", file, line);
             exit(EXIT_FAILURE);
             
         default:
-            fprintf(stderr, "[SCONOSCIUTO] Errore non previsto durante la creazione.\n");
+            fprintf(stderr, "[ERRORE] [%s:%d] Errore non previsto (Codice: %d).\n", file, line, stato);
             exit(EXIT_FAILURE);
     }  
 }
