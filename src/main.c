@@ -3,9 +3,9 @@
 #include "funzioni.h"
 
 int main(void) {
+
     Lista *lista = NULL; 
 
-    // --- PRIMA LISTA (Sintassi pulita enterprise con CHECK) ---
     CHECK(create_list(3, &lista));
 
     CHECK(aggiungi_numero_alla_lista(lista, 10));
@@ -16,7 +16,7 @@ int main(void) {
     CHECK(stampa_lista(lista));
     CHECK(libera_memoria_lista(&lista));
 
-    // --- SECONDA LISTA ---
+
     Lista *seconda_lista = NULL; 
     
     CHECK(create_list(2, &seconda_lista)); 
@@ -27,6 +27,8 @@ int main(void) {
     
     CHECK(stampa_lista(seconda_lista));
     CHECK(libera_memoria_lista(&seconda_lista));
+
+    CHECK(aggiungi_numero_alla_lista(seconda_lista, 10)); //questo farà scattare l'errore del puntatore a NULL con nome file e numero riga grazie alla macro
 
     return EXIT_SUCCESS;
 }
